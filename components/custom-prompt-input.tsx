@@ -1,6 +1,5 @@
 import type { UseChatHelpers } from "@ai-sdk/react"
 import type { UIMessage } from "ai"
-import { useRef, useState } from "react"
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -13,7 +12,6 @@ import {
   PromptInputFooter,
   PromptInputHeader,
   type PromptInputMessage,
-  PromptInputSpeechButton,
   PromptInputSubmit,
   PromptInputTextarea,
   PromptInputTools,
@@ -30,9 +28,6 @@ export default function CustomPromptInput({
   sendMessage,
   stop,
 }: Props) {
-  const [text, setText] = useState("")
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-
   function handleSubmit(message: PromptInputMessage) {
     switch (status) {
       case "submitted":
@@ -52,14 +47,24 @@ export default function CustomPromptInput({
           text: message.text || "Sent with attachments",
           files: message.files,
         })
-        setText("")
         break
       }
     }
   }
 
+  function handleError(error: { code: string }) {
+    if (error.code === "accept") {
+      alert("Invalid file type. Please upload an Image or PDF.")
+    }
+  }
+
   return (
-    <PromptInput onSubmit={handleSubmit} multiple>
+    <PromptInput
+      onSubmit={handleSubmit}
+      multiple
+      accept="image/*,application/pdf"
+      onError={handleError}
+    >
       <PromptInputHeader>
         <PromptInputAttachments>
           {(attachment) => <PromptInputAttachment data={attachment} />}
@@ -67,11 +72,7 @@ export default function CustomPromptInput({
       </PromptInputHeader>
 
       <PromptInputBody>
-        <PromptInputTextarea
-          onChange={(e) => setText(e.target.value)}
-          ref={textareaRef}
-          value={text}
-        />
+        <PromptInputTextarea name="message" />
       </PromptInputBody>
 
       <PromptInputFooter>
@@ -82,10 +83,6 @@ export default function CustomPromptInput({
               <PromptInputActionAddAttachments />
             </PromptInputActionMenuContent>
           </PromptInputActionMenu>
-          <PromptInputSpeechButton
-            onTranscriptionChange={setText}
-            textareaRef={textareaRef}
-          />
         </PromptInputTools>
         <PromptInputSubmit status={status} />
       </PromptInputFooter>
