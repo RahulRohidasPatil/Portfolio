@@ -1,42 +1,152 @@
 "use client"
 
 import { useChat } from "@ai-sdk/react"
-import { useState } from "react"
+import type {
+  FileUIPart,
+  ReasoningUIPart,
+  SourceUrlUIPart,
+  TextUIPart,
+  UIMessage,
+} from "ai"
+import { MessageSquare } from "lucide-react"
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation"
+import {
+  Message,
+  MessageAttachment,
+  MessageAttachments,
+  MessageContent,
+  MessageResponse,
+} from "@/components/ai-elements/message"
+import {
+  Reasoning,
+  ReasoningContent,
+  ReasoningTrigger,
+} from "@/components/ai-elements/reasoning"
+import {
+  Source,
+  Sources,
+  SourcesContent,
+  SourcesTrigger,
+} from "@/components/ai-elements/sources"
+import CustomPromptInput from "@/components/custom-prompt-input"
+
+function splitMessageParts(message: UIMessage) {
+  return message.parts.reduce(
+    (prev, curr) => {
+      switch (curr.type) {
+        case "file": {
+          prev[0].push(curr)
+          break
+        }
+        case "source-url": {
+          prev[1].push(curr)
+          break
+        }
+        case "text":
+        case "reasoning": {
+          prev[2].push(curr)
+          break
+        }
+      }
+      return prev
+    },
+    [[], [], []] as [
+      FileUIPart[],
+      SourceUrlUIPart[],
+      (TextUIPart | ReasoningUIPart)[],
+    ],
+  )
+}
 
 export default function Page() {
-  const [input, setInput] = useState("")
-  const { messages, sendMessage } = useChat()
+  const { messages, status, sendMessage } = useChat()
 
   return (
-    <div className="stretch mx-auto flex w-full max-w-md flex-col py-24">
-      {messages.map((message) => (
-        <div key={message.id} className="whitespace-pre-wrap">
-          {message.role === "user" ? "User: " : "AI: "}
-          {message.parts.map((part, i) => {
-            switch (part.type) {
-              case "text":
-                return <div key={`${message.id}-${i}`}>{part.text}</div>
-              default:
-                return null
-            }
-          })}
-        </div>
-      ))}
+    <>
+      <Conversation>
+        <ConversationContent>
+          {messages.length === 0 ? (
+            <ConversationEmptyState
+              icon={<MessageSquare />}
+              title="Start a conversation"
+              description="Type a message below to begin chatting"
+            />
+          ) : (
+            messages.map((message) => {
+              const [fileParts, sourceParts, responseParts] =
+                splitMessageParts(message)
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          sendMessage({ text: input })
-          setInput("")
-        }}
-      >
-        <input
-          className="fixed bottom-0 mb-8 w-full max-w-md rounded border border-zinc-300 p-2 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
-          value={input}
-          placeholder="Say something..."
-          onChange={(e) => setInput(e.currentTarget.value)}
-        />
-      </form>
-    </div>
+              return (
+                <Message
+                  key={message.id}
+                  from={message.role}
+                  className="text-justify"
+                >
+                  {fileParts.length > 0 && (
+                    <MessageAttachments>
+                      {fileParts.map((part) => (
+                        <MessageAttachment data={part} key={part.url} />
+                      ))}
+                    </MessageAttachments>
+                  )}
+
+                  {responseParts.map((part, i) => {
+                    switch (part.type) {
+                      case "text": {
+                        return (
+                          <MessageContent key={`${message.id}-${i}`}>
+                            {message.role === "assistant" ? (
+                              <MessageResponse>{part.text}</MessageResponse>
+                            ) : (
+                              part.text
+                            )}
+                          </MessageContent>
+                        )
+                      }
+                      case "reasoning": {
+                        return (
+                          <Reasoning
+                            key={`${message.id}-${i}`}
+                            isStreaming={
+                              status === "streaming" &&
+                              i === responseParts.length - 1 &&
+                              message.id === messages.at(-1)?.id
+                            }
+                          >
+                            <ReasoningTrigger />
+                            <ReasoningContent>{part.text}</ReasoningContent>
+                          </Reasoning>
+                        )
+                      }
+                      default: {
+                        return null
+                      }
+                    }
+                  })}
+
+                  {message.role === "assistant" && (
+                    <Sources>
+                      <SourcesTrigger count={sourceParts.length} />
+                      {sourceParts.map((part) => (
+                        <SourcesContent key={part.sourceId}>
+                          <Source href={part.url} title={part.title} />
+                        </SourcesContent>
+                      ))}
+                    </Sources>
+                  )}
+                </Message>
+              )
+            })
+          )}
+        </ConversationContent>
+        <ConversationScrollButton />
+      </Conversation>
+      <CustomPromptInput status={status} sendMessage={sendMessage} />
+    </>
   )
 }
