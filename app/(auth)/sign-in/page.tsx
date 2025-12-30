@@ -7,6 +7,7 @@ export default function Page() {
   async function handleClick() {
     await authClient.signIn.social({
       provider: "google",
+      callbackURL: "/chat",
     })
   }
 
