@@ -52,8 +52,19 @@ export default function CustomPromptInput({
     }
   }
 
+  function handleError(error: { code: string }) {
+    if (error.code === "accept") {
+      alert("Invalid file type. Please upload an Image or PDF.")
+    }
+  }
+
   return (
-    <PromptInput onSubmit={handleSubmit} multiple>
+    <PromptInput
+      onSubmit={handleSubmit}
+      multiple
+      accept="image/*,application/pdf"
+      onError={handleError}
+    >
       <PromptInputHeader>
         <PromptInputAttachments>
           {(attachment) => <PromptInputAttachment data={attachment} />}
