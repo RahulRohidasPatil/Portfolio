@@ -100,11 +100,7 @@ export default function Page() {
                       case "text": {
                         return (
                           <MessageContent key={`${message.id}-${i}`}>
-                            {message.role === "assistant" ? (
-                              <MessageResponse>{part.text}</MessageResponse>
-                            ) : (
-                              part.text
-                            )}
+                            <MessageResponse>{part.text}</MessageResponse>
                           </MessageContent>
                         )
                       }
