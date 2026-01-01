@@ -1,5 +1,6 @@
 import type { UseChatHelpers } from "@ai-sdk/react"
 import type { UIMessage } from "ai"
+import { useState } from "react"
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -28,6 +29,8 @@ export default function CustomPromptInput({
   sendMessage,
   stop,
 }: Props) {
+  const [text, setText] = useState<string>("")
+
   function handleSubmit(message: PromptInputMessage) {
     switch (status) {
       case "submitted":
@@ -47,6 +50,7 @@ export default function CustomPromptInput({
           text: message.text || "Sent with attachments",
           files: message.files,
         })
+        setText("")
         break
       }
     }
@@ -72,7 +76,10 @@ export default function CustomPromptInput({
       </PromptInputHeader>
 
       <PromptInputBody>
-        <PromptInputTextarea />
+        <PromptInputTextarea
+          onChange={(e) => setText(e.target.value)}
+          value={text}
+        />
       </PromptInputBody>
 
       <PromptInputFooter>
