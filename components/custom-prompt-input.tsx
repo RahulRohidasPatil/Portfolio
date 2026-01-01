@@ -72,7 +72,7 @@ export default function CustomPromptInput({
       </PromptInputHeader>
 
       <PromptInputBody>
-        <PromptInputTextarea name="message" />
+        <PromptInputTextarea />
       </PromptInputBody>
 
       <PromptInputFooter>
