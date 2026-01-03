@@ -1,5 +1,3 @@
-"use cache"
-
 import { type GoogleGenerativeAIProviderOptions, google } from "@ai-sdk/google"
 import { convertToModelMessages, streamText, type UIMessage } from "ai"
 
