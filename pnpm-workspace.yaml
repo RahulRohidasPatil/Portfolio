@@ -6,5 +6,4 @@ ignoredBuiltDependencies:
   - unrs-resolver
 
 onlyBuiltDependencies:
-  - '@clerk/shared'
   - esbuild
