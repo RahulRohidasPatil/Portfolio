@@ -1,17 +1,12 @@
+import { ClerkProvider, SignedIn, UserButton } from "@clerk/nextjs"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { ThemeProvider } from "next-themes"
-import { Suspense } from "react"
 import "./globals.css"
-import {
-  ClerkProvider,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs"
-import { Button } from "@/components/ui/button"
+import { shadcn } from "@clerk/themes"
+import { Suspense } from "react"
+import { ModeToggle } from "@/components/mode-toggle"
+import { Spinner } from "@/components/ui/spinner"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,27 +35,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
-          <ClerkProvider>
-            {/* Clerk components go here */}
-            <header className="flex h-16 items-center justify-end gap-4 p-4">
-              <Suspense>
-                <SignedOut>
-                  <SignInButton />
-                  <SignUpButton>
-                    <Button className="h-10 cursor-pointer rounded-full bg-[#6c47ff] px-4 font-medium text-ceramic-white text-sm sm:h-12 sm:px-5 sm:text-base">
-                      Sign Up
-                    </Button>
-                  </SignUpButton>
-                </SignedOut>
-              </Suspense>
-              <Suspense>
+          <Suspense fallback={<Spinner />}>
+            <ClerkProvider
+              appearance={{
+                theme: shadcn,
+              }}
+            >
+              <header className="flex items-center justify-end gap-2 p-2">
+                <ModeToggle />
                 <SignedIn>
-                  <UserButton />
+                  <UserButton showName fallback={<Spinner />} />
                 </SignedIn>
-              </Suspense>
-            </header>
-          </ClerkProvider>
-          <Suspense>{children}</Suspense>
+              </header>
+              {children}
+            </ClerkProvider>
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>
