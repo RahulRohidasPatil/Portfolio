@@ -20,6 +20,18 @@ export async function POST(req: Request) {
 
   const isImageModel = model.includes("-image-")
 
+  // To avoid thought signature errors
+  const filteredMessages = isImageModel
+    ? messages.map((message) =>
+        message.role === "assistant"
+          ? {
+              ...message,
+              parts: message.parts.filter((part) => part.type !== "file"),
+            }
+          : message,
+      )
+    : messages
+
   if (!isImageModel) {
     tools.code_execution = google.tools.codeExecution({})
     tools.url_context = google.tools.urlContext({})
@@ -40,7 +52,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: google(model),
-    messages: await convertToModelMessages(messages),
+    messages: await convertToModelMessages(filteredMessages),
     tools,
     providerOptions: {
       google: googleOptions,
