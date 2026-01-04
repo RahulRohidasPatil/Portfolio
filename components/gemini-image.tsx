@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { type SyntheticEvent, useState } from "react"
+import { ImageZoom } from "./kibo-ui/image-zoom"
 
 export default function GeminiImage({ src }: { src: string }) {
   const [aspectRatio, setAspectRatio] = useState(16 / 9)
@@ -12,13 +13,15 @@ export default function GeminiImage({ src }: { src: string }) {
   }
 
   return (
-    <div className="relative min-h-37.5 min-w-37.5" style={{ aspectRatio }}>
-      <Image
-        src={src}
-        alt="Gemini generated image"
-        fill
-        onLoad={handleLoadingComplete}
-      />
-    </div>
+    <ImageZoom>
+      <div className="relative min-h-37.5 min-w-37.5" style={{ aspectRatio }}>
+        <Image
+          src={src}
+          alt="Gemini generated image"
+          fill
+          onLoad={handleLoadingComplete}
+        />
+      </div>
+    </ImageZoom>
   )
 }
