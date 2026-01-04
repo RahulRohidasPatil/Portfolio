@@ -5,13 +5,10 @@ import {
   type ToolSet,
   type UIMessage,
 } from "ai"
-import type { models } from "@/lib/constants"
+import type { ModelId } from "@/lib/types"
 
 export async function POST(req: Request) {
-  const {
-    messages,
-    model,
-  }: { messages: UIMessage[]; model: (typeof models)[number]["id"] } =
+  const { messages, model }: { messages: UIMessage[]; model: ModelId } =
     await req.json()
 
   const tools: ToolSet = {
@@ -19,18 +16,6 @@ export async function POST(req: Request) {
   }
 
   const isImageModel = model.includes("-image-")
-
-  // To avoid thought signature errors
-  const filteredMessages = isImageModel
-    ? messages.map((message) =>
-        message.role === "assistant"
-          ? {
-              ...message,
-              parts: message.parts.filter((part) => part.type !== "file"),
-            }
-          : message,
-      )
-    : messages
 
   if (!isImageModel) {
     tools.code_execution = google.tools.codeExecution({})
@@ -52,7 +37,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: google(model),
-    messages: await convertToModelMessages(filteredMessages),
+    messages: await convertToModelMessages(messages),
     tools,
     providerOptions: {
       google: googleOptions,
