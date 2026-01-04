@@ -1,12 +1,13 @@
 "use client"
 
 import { useChat } from "@ai-sdk/react"
-import type {
-  FileUIPart,
-  ReasoningUIPart,
-  SourceUrlUIPart,
-  TextUIPart,
-  UIMessage,
+import {
+  DefaultChatTransport,
+  type FileUIPart,
+  type ReasoningUIPart,
+  type SourceUrlUIPart,
+  type TextUIPart,
+  type UIMessage,
 } from "ai"
 import { MessageSquare } from "lucide-react"
 import {
@@ -64,8 +65,28 @@ function splitMessageParts(message: UIMessage) {
   )
 }
 
+function filterMessages(messages: UIMessage[]) {
+  return messages.map((message) =>
+    message.role === "assistant"
+      ? {
+          ...message,
+          parts: message.parts.filter((part) => part.type !== "file"),
+        }
+      : message,
+  )
+}
+
 export default function Page() {
-  const { messages, status, sendMessage, stop } = useChat()
+  const { messages, status, sendMessage, stop } = useChat({
+    transport: new DefaultChatTransport({
+      prepareSendMessagesRequest: ({ messages, body }) => ({
+        body: {
+          ...body,
+          messages: filterMessages(messages),
+        },
+      }),
+    }),
+  })
 
   return (
     <>

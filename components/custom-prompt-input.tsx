@@ -2,6 +2,7 @@ import type { UseChatHelpers } from "@ai-sdk/react"
 import type { UIMessage } from "ai"
 import { useState } from "react"
 import { models } from "@/lib/constants"
+import type { ModelId } from "@/lib/types"
 import {
   PromptInput,
   PromptInputActionAddAttachments,
@@ -36,7 +37,7 @@ export default function CustomPromptInput({
   stop,
 }: Props) {
   const [text, setText] = useState<string>("")
-  const [model, setModel] = useState<string>(models[0].id)
+  const [model, setModel] = useState<ModelId>(models[0].id)
 
   function handleSubmit(message: PromptInputMessage) {
     switch (status) {
@@ -101,7 +102,7 @@ export default function CustomPromptInput({
             </PromptInputActionMenuContent>
           </PromptInputActionMenu>
           <PromptInputSelect
-            onValueChange={(value) => {
+            onValueChange={(value: ModelId) => {
               setModel(value)
             }}
             value={model}
