@@ -79,7 +79,7 @@ function filterMessages(messages: UIMessage[]) {
 }
 
 export default function Page() {
-  const { messages, status, sendMessage, stop, setMessages } = useChat({
+  const { messages, status, sendMessage, stop } = useChat({
     transport: new DefaultChatTransport({
       prepareSendMessagesRequest: ({ messages, body }) => ({
         body: {
@@ -181,11 +181,9 @@ export default function Page() {
         <ConversationScrollButton />
       </Conversation>
       <CustomPromptInput
-        messages={messages}
         status={status}
         sendMessage={sendMessage}
         stop={stop}
-        setMessages={setMessages}
       />
     </>
   )
