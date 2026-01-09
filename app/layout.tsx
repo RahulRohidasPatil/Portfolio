@@ -2,10 +2,10 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { ThemeProvider } from "next-themes"
 import { Suspense } from "react"
-import "./globals.css"
 import { ModeToggle } from "@/components/mode-toggle"
 import SignOutButton from "@/components/sign-out-button"
 import { Spinner } from "@/components/ui/spinner"
+import "./globals.css"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
